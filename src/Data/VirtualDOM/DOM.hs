@@ -13,7 +13,7 @@
  - See the License for the specific language governing permissions and
  - limitations under the License.
  -}
-module Ulmus.VirtualDOM.DOM where
+module Data.VirtualDOM.DOM where
 
 import Foundation
 import Foundation.Collection

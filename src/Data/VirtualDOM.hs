@@ -18,7 +18,7 @@
  - PURPOSE. See the GNU Lesser General Public License for
  - more details.
  -}
-module Ulmus.VirtualDOM where
+module Data.VirtualDOM where
 
 import           Foundation
 import           Foundation.Collection
@@ -28,7 +28,7 @@ import           GHCJS.Types
 import qualified Data.Map.Strict as Map
 import           Data.Map.Strict (Map)
 
-import qualified Ulmus.VirtualDOM.DOM as DOM
+import qualified Data.VirtualDOM.DOM as DOM
 
 type Props = Map String String
 

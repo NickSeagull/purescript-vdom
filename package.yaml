@@ -3,7 +3,7 @@ version:             0.1.0.0
 synopsis:            A pure Haskell VirtualDOM implementation
 description:         Please see README.md
 homepage:            https://github.com/theam/haskell-virtualdom#readme
-license:             LGPL3
+license:             LGPL-3
 author:              Theam
 maintainer:          hackers@theam.io
 copyright:           2017 The Agile Monkeys S.L.
@@ -12,21 +12,23 @@ extra-source-files:
 - README.md
 
 dependencies:
-  - base >= 4.7 && < 5
-  - containers
-  - ghcjs-base
-  - text
-  - foundation
+    - base >= 4.7 && < 5
+    - containers
+    - ghcjs-base
+    - text
+    - foundation
 
 default-extensions:
-  - NoImplicitPrelude
-  - OverloadedStrings
+    - NoImplicitPrelude
+    - OverloadedStrings
 
 ghc-options:
-  - -Wall
-  - -Werror
+    - -Wall
+    - -Werror
 
-executables:
-  ulmus:
-    source-dirs:      src
-    main:             Main.hs
+library:
+    source-dirs:
+        src
+    exposed-modules:
+        - Data.VirtualDOM
+        - Data.VirtualDOM.DOM
