@@ -27,6 +27,7 @@ import           GHCJS.Types
 
 import qualified Data.Map.Strict as Map
 import           Data.Map.Strict (Map)
+import           Data.Monoid     ((<>))
 
 import qualified Data.VirtualDOM.DOM as DOM
 
@@ -136,10 +137,11 @@ patchIndexed api parent (Just _) Nothing index = do
     Just n -> removeChild api n parent
     Nothing -> return ()
 
-patchIndexed api parent (Just (Text old)) (Just (Text new)) index =
+patchIndexed api parent (Just (Text old)) (Just (Text new)) index = do
   when (old /= new) $ do
-    me <- childAt api index parent
-    maybe (return ()) (setTextContent api new) me
+    if index == 0
+      then setTextContent api new parent
+      else throwJS (DOM.toJSString $ "patchIndexed text->text error: index /= 0 (" <> show index <> ")" )
 
 patchIndexed api parent (Just old) (Just new) index = do
   me' <- childAt api index parent
@@ -177,6 +179,9 @@ walkChildren api target old new =
 
 foreign import javascript unsafe "$r = document.body;"
     js_body :: IO JSVal
+
+foreign import javascript unsafe "throw $1"
+    throwJS :: JSString -> IO ()
 
 getBody :: IO DOM.Node
 getBody = do
