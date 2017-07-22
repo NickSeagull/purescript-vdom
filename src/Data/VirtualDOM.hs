@@ -141,6 +141,23 @@ patchIndexed api parent (Just (Text old)) (Just (Text new)) index =
     me <- childAt api index parent
     maybe (return ()) (setTextContent api new) me
 
+patchIndexed api parent (Just (Text _)) (Just new@(Element _ _ _ _)) _ = do
+  setTextContent api "" parent -- remove inner text
+  n <- createEl api new
+  appendChild api n parent
+
+patchIndexed api parent (Just (Element _ _ _ _)) (Just (Text new)) _ = do
+  cs <- childCount api parent
+  mapM_ (f parent) (reverse [0..cs-1])
+  setTextContent api new parent
+
+  where
+    f p i = do
+      child <- childAt api i p
+      case child of
+        Just n -> removeChild api n p
+        Nothing -> return ()
+
 patchIndexed api parent (Just old) (Just new) index = do
   me' <- childAt api index parent
   case me' of
