@@ -181,7 +181,7 @@ walkChildren api target old new =
     if oldLength > newLength
         then do
             walkIndexes' [0 .. (newLength - 1)] -- walk up to last child of new
-            walkIndexes' [(oldLength - 1) .. newLength] -- delete children backwards from end
+            walkIndexes' (reverse [newLength .. (oldLength - 1)]) -- delete children backwards from end
         else
             walkIndexes' [0 .. (newLength - 1)]
   where
