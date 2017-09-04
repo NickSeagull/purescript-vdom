@@ -125,10 +125,8 @@ updateProps api target old new =
                 setAttribute api key value target
             (Just _, Nothing) ->
                 removeAttribute api key target
-            -- (Just prev, Just next) ->
-            (Just _, Just next) ->
-                setAttribute api key next target
-                -- when (prev /= next) (setAttribute api key next target) -- TODO skip comparison only for event listeners
+            (Just prev, Just next) ->
+                when (prev /= next) (setAttribute api key next target)
             (Nothing, Nothing) ->
                 return ()
 
