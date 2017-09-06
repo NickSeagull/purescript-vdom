@@ -70,6 +70,7 @@ data DOM l = DOM
   , setAttribute :: String -> String -> l -> IO ()
   , removeAttribute :: String -> l -> IO ()
   , addEventListener :: String -> (JSVal -> IO ()) -> l -> IO ()
+  , removeEventListener :: String -> l -> IO ()
   }
 
 domAPI :: DOM DOM.Node
@@ -86,6 +87,7 @@ domAPI = DOM
   , setAttribute = DOM.setAttribute
   , removeAttribute = DOM.removeAttribute
   , addEventListener = DOM.addEventListener
+  , removeEventListener = DOM.removeEventListener
   }
 
 newtype Elem = Elem JSVal
@@ -99,14 +101,22 @@ createEl api e = do
     mapM_ (createEl api >=> flip (appendChild api) el) (children e)
     return el
 
-addListener :: DOM l-> l -> EventListener l-> IO ()
+addListener :: DOM l -> l -> EventListener l -> IO ()
 addListener api target (On n handler) = addEventListener api n handler target
 
-changed :: VNode l-> VNode l-> Bool
+removeListener :: DOM l -> l -> EventListener l -> IO ()
+removeListener api target (On n _) = removeEventListener api n target
+
+changed :: VNode l -> VNode l-> Bool
 changed (Text t1) (Text t2) = t1 /= t2
 changed e1 e2 = name e1 /= name e2
 
-updateProps :: DOM l-> l -> Props -> Props -> IO ()
+updateListeners :: DOM l -> l -> [EventListener l] -> [EventListener l] -> IO ()
+updateListeners api me oldListeners newListeners = do
+  mapM_ (removeListener api me) oldListeners
+  mapM_ (addListener api me) newListeners
+
+updateProps :: DOM l -> l -> Props -> Props -> IO ()
 updateProps api target old new =
     mapM_ update (Map.keys (Map.union old new))
   where
@@ -171,7 +181,8 @@ patchIndexed api parent (Just old) (Just new) index = do
             replaceChild api n me parent
           else do
             case (old, new) of
-              (Element {props = oldProps}, Element {props = newProps}) ->
+              (Element {props = oldProps, listeners = oldListeners}, Element {props = newProps, listeners = newListeners}) -> do
+                updateListeners api me oldListeners newListeners
                 updateProps api me oldProps newProps
               (_, _) -> return ()
             walkChildren api me old new

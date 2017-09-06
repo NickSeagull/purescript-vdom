@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Data.VirtualDOM.DOM where
 
 import Foundation
@@ -59,6 +61,10 @@ addEventListener eventName f (Node node) = do
     cb <- asyncCallback1 f
     js_addEventListener (toJSString eventName) cb node
 
+removeEventListener :: String -> Node -> IO ()
+removeEventListener eventName (Node node) = do
+    js_removeEventListener (toJSString eventName) node
+
 -- FFI
 
 foreign import javascript unsafe "document.createElement($1)"
@@ -91,8 +97,13 @@ foreign import javascript unsafe "$3.setAttribute($1, $2);"
 foreign import javascript unsafe "$2.removeAttribute($1);"
     js_removeAttribute :: JSString -> JSVal -> IO ()
 
-foreign import javascript unsafe "$3.addEventListener($1, $2);"
+foreign import javascript unsafe "function(eventName, handler, node){ node.addEventListener(eventName, handler); node.__zzz = node.__zzz || {}; node.__zzz[eventName] = node.__zzz[eventName] || []; node.__zzz[eventName].push(handler); }($1, $2, $3)"
     js_addEventListener :: JSString -> Callback (JSVal -> IO()) -> JSVal -> IO ()
+
+-- XXX currently js_removeEventListener removes _all_ event listeners for a given event name
+-- TODO remove event listeners individually (is it possible at all?)
+foreign import javascript unsafe "function(eventName, node){ if(node.__zzz && node.__zzz[eventName]) { for(var i=0; i < node.__zzz[eventName].length; i++) { node.removeEventListener(eventName, node.__zzz[eventName][i]); } node.__zzz[eventName] = []; } }($1, $2)"
+    js_removeEventListener :: JSString -> JSVal -> IO ()
 
 --
 
